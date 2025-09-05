@@ -4,6 +4,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import dev.fer.Api.dtos.TicketsDTORequest;
+import dev.fer.Api.dtos.TicketsDTOResponse;
+import dev.fer.Api.mapper.TicketsMapper;
+
 @Service
 public class TicketsService {
 
@@ -25,6 +29,17 @@ public class TicketsService {
     }
     public TicketsEntity getTicketById(Long id) {
     return repository.findById(id).orElse(null);
-}
+    }
+
+     // Actualizar ticket
+    public TicketsDTOResponse updateTicket(Long id, TicketsDTORequest dtoRequest) {
+        TicketsEntity entity = TicketsMapper.toEntity(dtoRequest);
+        entity.setId(id); // solo seteamos el id
+        TicketsEntity updated = repository.save(entity);
+        return TicketsMapper.toDTO(updated);
+    }
+
+
+
 
 }

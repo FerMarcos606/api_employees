@@ -4,10 +4,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping; // Importa PostMapping
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody; // Importa RequestBody
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import dev.fer.Api.dtos.TicketsDTORequest;
+import dev.fer.Api.dtos.TicketsDTOResponse;
+
 import java.util.List;
 
 @RestController
@@ -40,5 +45,12 @@ public class TicketsController {
         return service.createTicket(ticket);
     }
 
-   
+    @PutMapping("/{id}")
+        public TicketsDTOResponse updateTicket(
+        @PathVariable Long id,
+        @RequestBody TicketsDTORequest updateRequest) {
+
+        return service.updateTicket(id, updateRequest);
+    }
+
 }

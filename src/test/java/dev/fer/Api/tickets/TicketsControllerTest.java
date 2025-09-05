@@ -3,9 +3,12 @@ package dev.fer.Api.tickets;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -21,23 +24,28 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.fer.Api.dtos.TicketsDTORequest;
+import dev.fer.Api.dtos.TicketsDTOResponse;
+import dev.fer.Api.mapper.TicketsMapper;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @WebMvcTest(TicketsController.class) 
 @TestPropertySource(properties = "api-endpoint=/api/v1")
 public class TicketsControllerTest {
 
-      @Autowired
+    @Autowired
     private MockMvc mockMvc;
 
     
     @Autowired
     ObjectMapper mapper;
 
-   @MockitoBean
+    @MockitoBean
     private TicketsService service;
 
-     @Test
+        @Test
         void testIndex_ShouldReturnAName() throws Exception {
             TicketsEntity LuisR = new TicketsEntity();
             LuisR.setId(1L);
@@ -98,8 +106,39 @@ public class TicketsControllerTest {
             assertThat(response.getContentAsString(), is(equalTo(json)));
         }
 
-    
-    
+          @Test
+            void testUpdateTicket_ShouldReturnUpdatedTicket() throws Exception {
+            // Creamos el DTO request de entrada
+            TicketsDTORequest updateRequest = new TicketsDTORequest("DanielH", "Se ha agregado la dirección del usuario en el ticket");
+
+            // Creamos el DTO response esperado usando el mapper
+            TicketsEntity updatedEntity = new TicketsEntity();
+            updatedEntity.setId(1L);
+            updatedEntity.setEmployeesName(updateRequest.employeesName());
+            updatedEntity.setDescription(updateRequest.description());
+            TicketsDTOResponse updatedTicket = TicketsMapper.toDTO(updatedEntity);
+
+            // Mockeamos el service
+            when(service.updateTicket(1L, updateRequest)).thenReturn(updatedTicket);
+
+            // Convertimos la request a JSON
+            String jsonRequest = mapper.writeValueAsString(updateRequest);
+
+            // Ejecutamos la petición PUT al controller
+            MockHttpServletResponse response = mockMvc.perform(
+                    put("/api/v1/tickets/1")
+                    .contentType("application/json")
+                    .content(jsonRequest))
+                    .andExpect(status().isOk())
+                    .andReturn()
+                    .getResponse();
+
+            // Comparamos la respuesta JSON con la esperada
+            String jsonResponse = mapper.writeValueAsString(updatedTicket);
+            assertThat(response.getContentAsString(), is(equalTo(jsonResponse)));
+        }
+
+       
     
     }
 
